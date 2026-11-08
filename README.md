@@ -29,13 +29,13 @@ the target.
 
 ```sh
 brew install gum
-git clone https://github.com/pthm/barbasol-can ~/.config/rex/agent_move
-echo 'require("agent_move")' >> ~/.config/rex/init.lua
+git clone https://github.com/pthm/barbasol-can ~/.config/rex/barbasol_can
+echo 'require("barbasol_can")' >> ~/.config/rex/init.lua
 rex config reload
 ```
 
 Hosts come from `rex hosts`. Bind a key with
-`rex.bind("cmd+shift+m", "agent_move")`.
+`rex.bind("cmd+shift+m", "barbasol_can")`.
 
 ## Finding the pane's session
 

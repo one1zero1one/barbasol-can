@@ -1,4 +1,4 @@
--- The agent harnesses agent_move can move, loaded with dofile by init.lua (on
+-- The agent harnesses barbasol_can can move, loaded with dofile by init.lua (on
 -- the Rex server, to find the pane's session) and by move.lua (to move it).
 --
 -- Each harness has:

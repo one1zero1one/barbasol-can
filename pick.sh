@@ -6,7 +6,7 @@ from=${app:-$(hostname -s)}
 move="$(dirname "$0")/move.lua"
 step() { rex do "$move" "$@"; }
 fail() { printf '\n%s\n\nPress Enter to close.' "$*"; read -r _; exit 1; }
-command -v gum >/dev/null || fail "agent_move needs gum: brew install gum"
+command -v gum >/dev/null || fail "barbasol_can needs gum: brew install gum"
 
 # A step under a spinner: its output on stdout, its error kept in $errf for fail.
 errf=$(mktemp) || exit 1

@@ -1,11 +1,11 @@
--- agent_move: a Rex plugin that moves a running agent session (Claude Code,
+-- barbasol_can: a Rex plugin that moves a running agent session (Claude Code,
 -- Codex or opencode) to another host.
 --
 -- Adds "Move Agent Session…" to the command palette. Run it on a pane running
 -- an agent; a floating picker asks for the host, a Rex session and a directory
 -- there, and the session resumes on that host.
 
--- Rex names this chunk relative to the config file's directory, e.g. "agent_move/init.lua".
+-- Rex names this chunk relative to the config file's directory, e.g. "barbasol_can/init.lua".
 local function config_dir()
   local c = os.getenv("REX_CONFIG")
   if c then return c:match("^(.*)/[^/]*$") end
@@ -17,7 +17,7 @@ local H = dofile(here .. "/harnesses.lua")
 local T = "com.superlogical.terminal"
 
 rex.action{
-  name = "agent_move",
+  name = "barbasol_can",
   title = "Move Agent Session…",
   category = "Agents",
   keywords = "claude codex opencode agent session move push resume transfer host",

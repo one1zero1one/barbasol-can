@@ -43,13 +43,13 @@ local function term(method, args)
 end
 
 -- The receiver reports how it ended as a program status record (OSC 7501) with
--- id "agentmove": done just before it execs the agent, or error with the
+-- id "barbasolcan": done just before it execs the agent, or error with the
 -- reason. Records outlive the exec and the agent's own reports use other ids,
 -- so this is what the sender checks, rather than the screen, which the agent
 -- replaces as soon as it starts.
 local function outcome()
   for _, r in ipairs(term("program_status", {}).records or {}) do
-    if r.id == "agentmove" then return r.state, r.msg end
+    if r.id == "barbasolcan" then return r.state, r.msg end
   end
 end
 
@@ -74,8 +74,8 @@ end
 -- machine it comes from, $4 the session's title. The working records show as a
 -- spinner on the tab while it waits, receives and imports.
 local RECV = [[
-st() { printf '\033]7501;id=agentmove:app=agent_move:state=%s:msg=%s\033\\' "$1" "$(printf %s "$2" | base64 | tr -d '\n')"; }
-fail() { st error "$*"; echo "agent_move: $*"; exit 1; }
+st() { printf '\033]7501;id=barbasolcan:app=barbasol_can:state=%s:msg=%s\033\\' "$1" "$(printf %s "$2" | base64 | tr -d '\n')"; }
+fail() { st error "$*"; echo "barbasol_can: $*"; exit 1; }
 id=$1 from=$3 what=${4:-$1}
 resumed() { st done "Resumed $what from $from"; }
 command -v "$2" >/dev/null || fail "$2 isn't installed on this host"
