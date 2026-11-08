@@ -35,8 +35,13 @@ rex.action{
     -- moved session. Its connection to the target host has the same label.
     local c = ctx.client_id and rex.call("client.inspect", { client_id = ctx.client_id })
     local app = c and c.client.info.kind == "app" and c.client.info.label or ""
+    -- Aim for an 80-column picker: the share of the pane's width that gives it,
+    -- kept between 35% (big windows) and 90% (small ones). The pane is usually
+    -- the whole window's width; in a split this errs wider.
+    local size = rex.block.call(T, "size", { block_id = ctx.block_id })
+    local w = math.min(0.9, math.max(0.35, 80 / ((size and size.columns) or 80)))
     local _, err = rex.session.new_layer{
-      bounds = { 0.325, 0.2, 0.35, 0.5 }, -- x, y, width, height as fractions of the window
+      bounds = { (1 - w) / 2, 0.2, w, 0.5 }, -- x, y, width, height as fractions of the window
       focus = true,
       layout = rex.layout.block{
         flavor = T .. ".shell",
