@@ -1,0 +1,49 @@
+-- agent_move: a Rex plugin that moves a running agent session (Claude Code,
+-- Codex or opencode) to another host.
+--
+-- Adds "Move Agent Session…" to the command palette. Run it on a pane running
+-- an agent; a floating picker asks for the host, a Rex session and a directory
+-- there, and the session resumes on that host.
+
+-- Rex names this chunk relative to the config file's directory, e.g. "agent_move/init.lua".
+local function config_dir()
+  local c = os.getenv("REX_CONFIG")
+  if c then return c:match("^(.*)/[^/]*$") end
+  return (os.getenv("XDG_CONFIG_HOME") or os.getenv("HOME") .. "/.config") .. "/rex"
+end
+local here = debug.getinfo(1, "S").source:gsub("^@", ""):match("^(.*)/[^/]*$")
+if here:sub(1, 1) ~= "/" then here = config_dir() .. "/" .. here end
+local H = dofile(here .. "/harnesses.lua")
+local T = "com.superlogical.terminal"
+
+rex.action{
+  name = "agent_move",
+  title = "Move Agent Session…",
+  category = "Agents",
+  keywords = "claude codex opencode agent session move push resume transfer host",
+  run = function(ctx)
+    local p = rex.block.call(T, "process", { block_id = ctx.block_id })
+    local fg = p and p.foreground
+    local name, h = H.detect(fg)
+    if not h then
+      error("Nothing to move: this pane isn't running Claude Code, Codex or opencode", 0)
+    end
+    local t = rex.block.call(T, "title", { block_id = ctx.block_id })
+    local id, cwd, title = h.session(fg, t and t.title)
+    if not id then error("Can't move this " .. name .. " session: " .. cwd, 0) end
+    -- The app that ran the action, so the picker can have that app show the
+    -- moved session. Its connection to the target host has the same label.
+    local c = ctx.client_id and rex.call("client.inspect", { client_id = ctx.client_id })
+    local app = c and c.client.info.kind == "app" and c.client.info.label or ""
+    local _, err = rex.session.new_layer{
+      bounds = { 0.325, 0.2, 0.35, 0.5 }, -- x, y, width, height as fractions of the window
+      focus = true,
+      layout = rex.layout.block{
+        flavor = T .. ".shell",
+        label = "Move Agent Session",
+        options = { command = { "sh", here .. "/pick.sh", name, id, cwd, title or "", app, ctx.block_id } },
+      },
+    }
+    if err then error(err, 0) end
+  end,
+}
