@@ -3,9 +3,7 @@
 A [Rex](https://www.superlogical.com/rex) plugin that moves a running agent
 session to another Rex host. It supports Claude Code, Codex and opencode.
 
-The name comes from Jurassic Park, where Nedry tries to smuggle dinosaur
-embryos off the island in a Barbasol shaving-cream can. Rex's mascot is a
-dinosaur, and this smuggles agent sessions between Rex servers.
+https://github.com/user-attachments/assets/dd5ac465-7764-4847-8672-e08d4eeaeda2
 
 Run **Move Agent Session…** from the command palette while a pane running an
 agent is focused. A floating picker asks which host to move to, which Rex
@@ -76,3 +74,8 @@ changing it.
 
 The original session keeps running where it was. The two copies diverge from
 the moment of the move.
+
+## Why is it called Barbasol Can?
+The name comes from Jurassic Park, where Nedry tries to smuggle dinosaur
+embryos off the island in a Barbasol shaving-cream can. Rex's mascot is a
+dinosaur, and this smuggles agent sessions between Rex servers.
