@@ -3,7 +3,7 @@
 A [Rex](https://www.superlogical.com/rex) plugin that moves a running agent
 session to another Rex host. It supports Claude Code, Codex and opencode.
 
-https://github.com/user-attachments/assets/dd5ac465-7764-4847-8672-e08d4eeaeda2
+https://github.com/user-attachments/assets/4a40af18-d99b-4a56-8927-b5eb9f68a2e6
 
 Run **Move Agent Session…** from the command palette while a pane running an
 agent is focused. A floating picker asks which host to move to, which Rex
