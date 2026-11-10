@@ -60,20 +60,64 @@ local H = {}
 function H.codex_exec(args) return (args .. " "):match("^%S+%s+exec%s") ~= nil end
 H.utc = utc
 
+-- The command a process was started as. Claude Code's binary is a file named
+-- after its version, so the process is called "2.1.322" rather than "claude".
+function H.started_as(fg)
+  return (fg.argv0 or fg.invoked_path or fg.name or ""):match("[^/]*$")
+end
+
+-- The name of the session open in an agent view (`claude agents`) pane, from
+-- the pane's title: a status mark and the session's name, such as
+-- "✳ fix-login". With the list showing, the title ends in "claude agents".
+function H.agent_view_session(title)
+  if not title or title:match("claude agents$") then return nil end
+  local name = title:gsub("^[\128-\255]+%s+", "")
+  return name ~= "" and name or nil
+end
+
+-- The session called name in the output of `claude agents --json`, as id, cwd,
+-- name; or nil, why. A title cut short ends in "…" and matches as a prefix.
+function H.named_session(list, name)
+  local prefix = name:match("^(.-)…$")
+  local found = {}
+  for _, s in ipairs(list) do
+    local n = s.name or ""
+    if s.sessionId and (n == name or (prefix and n:sub(1, #prefix) == prefix)) then found[#found + 1] = s end
+  end
+  if #found == 0 then return nil, "no background session is named \"" .. name .. "\"" end
+  if #found > 1 then return nil, "several background sessions are named \"" .. name .. "\"; rename one" end
+  return found[1].sessionId, found[1].cwd, found[1].name
+end
+
 H.claude = {
   bin = "claude",
-  match = function(fg) return fg.name == "claude" end,
+  match = function(fg) return fg.name == "claude" or H.started_as(fg) == "claude" end,
   -- Claude Code records each running instance at ~/.claude/sessions/<pid>.json.
-  session = function(fg)
+  -- The agent view has no record of its own: the sessions it shows run under
+  -- Claude Code's daemon, not in the pane. The pane's title names the one that
+  -- is open, and `claude agents --json` has its id and directory.
+  session = function(fg, title)
     local s = rex.json.decode(readfile(HOME .. "/.claude/sessions/" .. fg.pid .. ".json") or "null")
-    if not (s and s.sessionId) then return nil, "Claude Code has no session record for this process" end
-    return s.sessionId, s.cwd, s.nameSource ~= "derived" and s.name or nil
+    if s and s.sessionId then return s.sessionId, s.cwd, s.nameSource ~= "derived" and s.name or nil end
+    if not (args(fg.pid) .. " "):match("^%S+%s+agents%s") then
+      return nil, "Claude Code has no session record for this process"
+    end
+    local name = H.agent_view_session(title)
+    if not name then return nil, "no session is open in this pane; open one in the agent view first" end
+    local list = rex.json.decode(sh('"$1" agents --json', fg.path or "claude"):match("%[.*%]") or "null")
+    if type(list) ~= "table" then return nil, "couldn't list the background sessions" end
+    return H.named_session(list, name)
   end,
   -- Sessions live under the project's cwd with every non-alphanumeric as "-",
   -- with subagent transcripts and tool results in a sibling <id>/ directory.
+  -- A session that moved into a worktree keeps its transcript under the
+  -- directory it started in, so fall back to finding it by id.
   export = [[
-cd "$HOME/.claude/projects/$(printf %s "$2" | sed 's/[^a-zA-Z0-9]/-/g')" &&
-tar czf - "$1.jsonl" $(test -d "$1" && echo "$1")
+p="$HOME/.claude/projects"
+d="$p/$(printf %s "$2" | sed 's/[^a-zA-Z0-9]/-/g')"
+test -f "$d/$1.jsonl" || d=$(dirname "$(ls "$p"/*/"$1.jsonl" 2>/dev/null | head -n 1)")
+test -f "$d/$1.jsonl" || { echo "no transcript for $1" >&2; exit 1; }
+cd "$d" && tar czf - "$1.jsonl" $(test -d "$1" && echo "$1")
 ]],
   import = [[
 p="$HOME/.claude/projects/$(printf %s "$to" | sed 's/[^a-zA-Z0-9]/-/g')"

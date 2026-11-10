@@ -45,9 +45,14 @@ newest:
 
 | Agent | Session |
 | --- | --- |
-| Claude Code | `~/.claude/sessions/<pid>.json` |
+| Claude Code | `~/.claude/sessions/<pid>.json`; in the agent view (`claude agents`), the pane title, which names the open session, matched against `claude agents --json` |
 | Codex | Its logs (`pid:<pid>` with the thread) when the thread runs in-process; otherwise the pane title (`<thread name> \| <dir>`) matched against the thread names in that directory; otherwise `codex resume <id>` in its arguments |
 | opencode | The `run=` in its shared log that started with the process, and the last session that run worked on; otherwise `-s <id>` in its arguments. The pane title (`OC \| <title>`) must agree |
+
+In the agent view, open the session you want to move first. With the list
+showing, the pane doesn't say which session you mean, and the action tells you
+so. A background session resumes on the target as an ordinary Claude Code
+session in the new tab; send it to the background there yourself.
 
 ## Moving it
 
