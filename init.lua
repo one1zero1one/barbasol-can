@@ -22,6 +22,12 @@ rex.action{
   category = "Agents",
   keywords = "claude codex opencode agent session move push resume transfer host",
   run = function(ctx)
+    -- On a pane of another server, the calls below reach that server while the
+    -- session lookup and the export read this machine, which could pick a
+    -- session here that only shares a pid or a name.
+    if ctx.server then
+      error("Can't move from " .. tostring(ctx.server) .. " yet: run this on a pane of the machine the plugin is installed on", 0)
+    end
     local p = rex.block.call(T, "process", { block_id = ctx.block_id })
     local fg = p and p.foreground
     local name, h = H.detect(fg)
